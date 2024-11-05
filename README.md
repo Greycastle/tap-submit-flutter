@@ -8,8 +8,21 @@ It is intended for devleopers as a fully customizable yet cost-effective alterna
 
 ## Usage
 
-Coming...
+Most bare minimum usage is as follows:
 
+```dart
+final client = TapSubmitClient(apiKey: 'your-api-key');
+final response = await client.submit({
+  'name': 'John Doe',
+  'email': 'john.doe@example.com',
+});
+
+if (response.success) {
+  print('Form submitted successfully');
+} else {
+  print('Form submission failed: ${response.errorMessage}');
+}
+```
 
 See also the [example/](example/) folder for a full example.
 
