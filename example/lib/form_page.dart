@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:tap_submit/tap_submit/tap_submit_client.dart';
 import 'package:tapsubmit_sdk_example/components/contact_form.dart';
 import 'package:tapsubmit_sdk_example/models/submission_model.dart';
 import 'package:tapsubmit_sdk_example/utils/space_with_extension.dart';
@@ -56,18 +58,25 @@ class _FormPageState extends State<FormPage> {
       _loading = true;
     });
 
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      final apiKey = submission.simulateFailure
+          ? 'invalid-api-key'
+          : dotenv.env['TAP_SUBMIT_API_KEY']!;
 
-    if (submission.simulateFailure) {
-      setState(() {
-        _error = 'Simulated failure';
-        _loading = false;
-      });
-    } else {
-      setState(() {
-        _submitted = true;
-        _loading = false;
-      });
+      final client = TapSubmitClient(apiKey: apiKey);
+      final data = submission.toJson();
+      data['hidden-key'] = 'hidden-value';
+      final response = await client.submit(data);
+      if (response.success) {
+        setState(() => _submitted = true);
+      } else {
+        setState(() => _error = response.errorMessage);
+      }
+    } catch (err, st) {
+      debugPrint('$err\n$st');
+      setState(() => _error = 'Error submitting form: $err');
+    } finally {
+      setState(() => _loading = false);
     }
   }
 
